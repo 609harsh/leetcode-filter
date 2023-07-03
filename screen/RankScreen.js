@@ -7,7 +7,8 @@ import { FlashList } from "@shopify/flash-list";
 import { Ionicons } from "@expo/vector-icons";
 import SimpleLottie from "../components/SimpleLottie";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { ScreenStackHeaderSearchBarView } from "react-native-screens";
+
+import each from "async/each";
 const RankScreen = ({
   navigation,
   route: {
@@ -58,33 +59,92 @@ const RankScreen = ({
       ),
     });
   }, []);
+
+  useEffect(() => {
+    const checkData = async () => {
+      try {
+        const value = await AsyncStorage.getItem(title);
+        if (value === null) {
+          try {
+            const stringValue = JSON.stringify(rank);
+            await AsyncStorage.setItem(title, stringValue);
+          } catch (err) {
+            console.log(err, "Error Writing Value");
+          }
+        }
+      } catch (e) {
+        console.log(err, "Error Reading data from storage");
+      }
+    };
+    checkData();
+  }, [rank]);
+
   useEffect(() => {
     const getData = async () => {
-      // let arr = [];
-      let i = 0;
-      const url = `https://leetcode.com/contest/api/ranking/${title}/?pagination=${0}&region=global`;
-      let arr = [];
-      for (let i = 1; i <= 20; i++) {
-        arr.push(
-          fetch(
-            `https://leetcode.com/contest/api/ranking/${title}/?pagination=${i}&region=global`
-          )
+      // let i = 0;
+      // const url = `https://leetcode.com/contest/api/ranking/${title}/?pagination=${0}&region=global`;
+      console.log("Process Started");
+      const res = await axios.get(
+        `https://leetcode.com/contest/api/ranking/${title}/?pagination=${1}&region=global`
+      );
+      let user_num = res.data.user_num;
+      let pages = Math.ceil(user_num / 25);
+      let count_loops = Math.ceil(pages / 100);
+      let time = new Date().getTime();
+      let result = [];
+      for (let i = 0; i < count_loops; i++) {
+        let arr = [];
+        console.log("Process Started", "loop", i);
+        for (let j = i * 100 + 1; j <= Math.min(i * 100 + 100, pages); j++) {
+          arr.push(
+            `https://leetcode.com/contest/api/ranking/${title}/?pagination=${j}&region=global`
+          );
+        }
+
+        each(
+          arr,
+          async function (file, callback) {
+            const res = await axios.get(file);
+            if (res.data) {
+              result.push(res.data);
+              // console.log(res.data);
+              // console.log("All data fetched");
+              return callback();
+            }
+            console.log(res, "1253");
+            callback();
+          },
+          (error) => {
+            if (error) {
+              console.log(error, "123");
+            }
+            console.log(result);
+            setRank(result);
+            setLoading(false);
+          }
         );
       }
-      console.log(arr, "543234543");
-      try {
-        const res = await Promise.all(arr);
-        const data = await Promise.all(res.map((r) => r.json()));
-        console.log(data, "123");
 
-        setRank(data);
-        setLoading(false);
-      } catch {
-        throw Error("Promise failed");
+      console.log(result);
+      console.log("loop finished");
+      console.log(new Date().getTime() - time);
+    };
+    // getData();
+
+    const checkData = async () => {
+      try {
+        const value = await AsyncStorage.getItem(title);
+        if (value !== null) {
+          setRank(JSON.parse(value));
+        } else {
+          getData();
+        }
+      } catch (e) {
+        console.log(err, "Error Reading data from storage");
       }
     };
 
-    getData();
+    checkData();
   }, []);
   // console.log(rank);
   return (
@@ -154,7 +214,7 @@ const RankScreen = ({
               <View>
                 <FlashList
                   data={item.total_rank}
-                  estimatedItemSize={30}
+                  estimatedItemSize={20000}
                   renderItem={({ item }) => (
                     <View>
                       <View
@@ -231,7 +291,11 @@ const RankScreen = ({
         <Input
           value={name}
           onChangeText={(text) => setName(text)}
-          placeholder="Search by Name"
+          placeholder={`Search by ${check1 ? "Rank, " : ""}${
+            check2 ? "UserName, " : ""
+          }${check3 ? "Country, " : ""}${check4 ? "Score, " : ""}${
+            check5 ? "Language, " : ""
+          }`}
           rightIcon={
             <MaterialCommunityIcons
               name="filter-menu-outline"
@@ -342,3 +406,31 @@ const styles = StyleSheet.create({
     borderColor: "black",
   },
 });
+
+// try {
+//   const res = await Promise.all(arr);
+//   const data = await Promise.all(res.map((r) => r.json()));
+//   console.log(data, "123");
+//   // console.log(new Date().getTime() - time);
+//   // setRank(data);
+//   // setLoading(false);
+// } catch (err) {
+//   console.log(err);
+//   break;
+//   // throw Error("Promise failed");
+// }
+
+// let arr = [];
+// for (let i = 1; i <= 350; i++) {
+//   arr.push(
+//     fetch(
+//       `https://leetcode.com/contest/api/ranking/${title}/?pagination=${i}&region=global`
+//     )
+//   );
+// }
+// async.each(arr, fetchData, function (err) {
+//   if (err) console.log(err);
+//   else {
+//     console.log("All data recieved");
+//   }
+// });
