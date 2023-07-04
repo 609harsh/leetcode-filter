@@ -7,7 +7,7 @@ import { FlashList } from "@shopify/flash-list";
 import { Ionicons } from "@expo/vector-icons";
 import SimpleLottie from "../components/SimpleLottie";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import each from "async/each";
 const RankScreen = ({
   navigation,
@@ -60,11 +60,14 @@ const RankScreen = ({
     });
   }, []);
 
+  //Local Storage Logic -----------------**---------------------**------------------------
   useEffect(() => {
     const checkData = async () => {
       try {
         const value = await AsyncStorage.getItem(title);
-        if (value === null) {
+
+        if (value === null && rank.length != 0) {
+          console.log("Data not Found");
           try {
             const stringValue = JSON.stringify(rank);
             await AsyncStorage.setItem(title, stringValue);
@@ -72,7 +75,7 @@ const RankScreen = ({
             console.log(err, "Error Writing Value");
           }
         }
-      } catch (e) {
+      } catch (err) {
         console.log(err, "Error Reading data from storage");
       }
     };
@@ -107,11 +110,11 @@ const RankScreen = ({
             const res = await axios.get(file);
             if (res.data) {
               result.push(res.data);
-              // console.log(res.data);
+              console.log(res.data);
               // console.log("All data fetched");
               return callback();
             }
-            console.log(res, "1253");
+            console.log(res, "error", "1253");
             callback();
           },
           (error) => {
@@ -129,24 +132,30 @@ const RankScreen = ({
       console.log("loop finished");
       console.log(new Date().getTime() - time);
     };
-    // getData();
+    getData();
 
-    const checkData = async () => {
-      try {
-        const value = await AsyncStorage.getItem(title);
-        if (value !== null) {
-          setRank(JSON.parse(value));
-        } else {
-          getData();
-        }
-      } catch (e) {
-        console.log(err, "Error Reading data from storage");
-      }
-    };
+    ///Local Storage Logic-------------------**-------------------**--------------------
 
-    checkData();
+    // const checkData = async () => {
+    //   try {
+    //     const value = await AsyncStorage.getItem(title);
+    //     if (value) {
+    //       console.log("Data Found");
+    //       console.log(JSON.parse(value));
+    //       setRank(JSON.parse(value));
+    //       setLoading(false);
+    //     } else {
+    //       getData();
+    //     }
+    //   } catch (err) {
+    //     console.log(err, "Error Reading data from storage", "123");
+    //   }
+    // };
+
+    // checkData();
   }, []);
   // console.log(rank);
+
   return (
     <>
       {loading ? (

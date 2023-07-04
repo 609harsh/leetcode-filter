@@ -7,6 +7,7 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import RankScreen from "./screen/RankScreen";
 import GlobalScreen from "./screen/GlobalScreen";
 import FilterScreen from "./screen/FilterScreen";
+import UserScreen from "./screen/UserScreen";
 const Stack = createNativeStackNavigator();
 
 export default function App() {
@@ -24,6 +25,11 @@ export default function App() {
           <Stack.Screen
             name="Filter"
             component={FilterScreen}
+            options={{ presentation: "card", animation: "slide_from_bottom" }}
+          />
+          <Stack.Screen
+            name="User"
+            component={UserScreen}
             options={{ presentation: "card", animation: "slide_from_bottom" }}
           />
           {/* <Stack.Screen name="Profile" component={Profile} /> */}

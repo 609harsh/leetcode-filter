@@ -15,6 +15,10 @@ const HomeScreen = ({ navigation }) => {
   const [questions, setQuestions] = useState();
   const [data, setData] = useState();
 
+  const onSearchUser = async () => {
+    navigation.navigate("User");
+  };
+
   const onSearch = async () => {
     const url =
       selectedIndex === 1
@@ -98,7 +102,6 @@ const HomeScreen = ({ navigation }) => {
           rightIconContainerStyle={{}}
           loadingProps={{}}
           onChangeText={(text) => setInput(text)}
-          onSubmitEditing={onSearch}
           placeholder="Enter Contest Number"
           round
           value={input}
@@ -120,11 +123,30 @@ const HomeScreen = ({ navigation }) => {
           }}
           onPress={onSearch}
         />
+
         <QuestionsDisplay
           questions={questions}
           data={data}
           selectedIndex={selectedIndex}
         />
+        <Button
+          title="Search User"
+          titleStyle={{ fontWeight: "500" }}
+          buttonStyle={{
+            backgroundColor: "rgba(199, 43, 98, 1)",
+            borderColor: "transparent",
+            borderWidth: 0,
+          }}
+          containerStyle={{
+            width: 200,
+            height: 45,
+            // marginHorizontal: 50,
+            marginVertical: 10,
+            alignSelf: "center",
+          }}
+          onPress={onSearchUser}
+        />
+        {/* <SearchUser /> */}
 
         <GlobalRanking />
       </ScrollView>
