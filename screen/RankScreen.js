@@ -9,6 +9,7 @@ import SimpleLottie from "../components/SimpleLottie";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import each from "async/each";
+import SearchModal from "../components/SearchModal";
 const RankScreen = ({
   navigation,
   route: {
@@ -21,11 +22,6 @@ const RankScreen = ({
   const [score, setScore] = useState();
   const [loading, setLoading] = useState(true);
   const [modalVisible, setModalVisible] = useState(false);
-  const [check1, setCheck1] = useState(false);
-  const [check2, setCheck2] = useState(false);
-  const [check3, setCheck3] = useState(false);
-  const [check4, setCheck4] = useState(false);
-  const [check5, setCheck5] = useState(false);
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -61,26 +57,27 @@ const RankScreen = ({
   }, []);
 
   //Local Storage Logic -----------------**---------------------**------------------------
-  useEffect(() => {
-    const checkData = async () => {
-      try {
-        const value = await AsyncStorage.getItem(title);
 
-        if (value === null && rank.length != 0) {
-          console.log("Data not Found");
-          try {
-            const stringValue = JSON.stringify(rank);
-            await AsyncStorage.setItem(title, stringValue);
-          } catch (err) {
-            console.log(err, "Error Writing Value");
-          }
-        }
-      } catch (err) {
-        console.log(err, "Error Reading data from storage");
-      }
-    };
-    checkData();
-  }, [rank]);
+  // useEffect(() => {
+  //   const checkData = async () => {
+  //     try {
+  //       const value = await AsyncStorage.getItem(title);
+
+  //       if (value === null && rank.length != 0) {
+  //         console.log("Data not Found");
+  //         try {
+  //           const stringValue = JSON.stringify(rank);
+  //           await AsyncStorage.setItem(title, stringValue);
+  //         } catch (err) {
+  //           console.log(err, "Error Writing Value");
+  //         }
+  //       }
+  //     } catch (err) {
+  //       console.log(err, "Error Reading data from storage");
+  //     }
+  //   };
+  //   checkData();
+  // }, [rank]);
 
   useEffect(() => {
     const getData = async () => {
@@ -95,64 +92,115 @@ const RankScreen = ({
       let count_loops = Math.ceil(pages / 100);
       let time = new Date().getTime();
       let result = [];
-      for (let i = 0; i < count_loops; i++) {
-        let arr = [];
-        console.log("Process Started", "loop", i);
-        for (let j = i * 100 + 1; j <= Math.min(i * 100 + 100, pages); j++) {
-          arr.push(
-            `https://leetcode.com/contest/api/ranking/${title}/?pagination=${j}&region=global`
-          );
-        }
-
-        each(
-          arr,
-          async function (file, callback) {
-            const res = await axios.get(file);
-            if (res.data) {
-              result.push(res.data);
-              console.log(res.data);
-              // console.log("All data fetched");
-              return callback();
-            }
-            console.log(res, "error", "1253");
-            callback();
-          },
-          (error) => {
-            if (error) {
-              console.log(error, "123");
-            }
-            console.log(result);
-            setRank(result);
-            setLoading(false);
-          }
+      let total_rank = [];
+      let submission = [];
+      let final_result = [];
+      let arr = [];
+      for (let j = 1; j <= pages; j++) {
+        arr.push(
+          `https://leetcode.com/contest/api/ranking/${title}/?pagination=${j}&region=global`
         );
       }
+      // each(
+      //   arr,
+      //   async function (file, callback) {
+      //     const res = await axios.get(file);
+      //     if (res.data) {
+      //       result.push(res.data);
+      //       total_rank.push(res.data.total_rank);
+      //       submission.push(res.data.submissions);
+      //       console.log(1);
+      //       // console.log("All data fetched");
+      //       return callback();
+      //     }
+      //     console.log(res, "error", "1253");
+      //     callback();
+      //   },
+      //   (error) => {
+      //     if (error) {
+      //       console.log(error, "123");
+      //     }
+      //     final_result.push(result);
+      //     final_result.push(total_rank);
+      //     final_result.push(submission);
+      //     console.log(final_result);
 
-      console.log(result);
-      console.log("loop finished");
-      console.log(new Date().getTime() - time);
+      //     //Store Value in local storage
+      //     const storeVal = async () => {
+      //       try {
+      //         const stringValue = JSON.stringify(final_result);
+      //         await AsyncStorage.setItem(title, stringValue);
+      //         console.log("Data stored Succesfully");
+      //       } catch (err) {
+      //         console.log(err, "Error Writing Value");
+      //       }
+      //     };
+
+      //     storeVal();
+
+      //     setRank(final_result);
+      //     setLoading(false);
+      //   }
+      // );
+      setLoading(false);
+      // for (let i = 0; i < count_loops; i++) {
+      //   let arr = [];
+      //   console.log("Process Started", "loop", i);
+      //   for (let j = i * 100 + 1; j <= Math.min(i * 100 + 100, pages); j++) {
+      //     arr.push(
+      //       `https://leetcode.com/contest/api/ranking/${title}/?pagination=${j}&region=global`
+      //     );
+      //   }
+
+      //   each(
+      //     arr,
+      //     async function (file, callback) {
+      //       const res = await axios.get(file);
+      //       if (res.data) {
+      //         result.push(res.data);
+      //         console.log(res.data);
+      //         // console.log("All data fetched");
+      //         return callback();
+      //       }
+      //       console.log(res, "error", "1253");
+      //       callback();
+      //     },
+      //     (error) => {
+      //       if (error) {
+      //         console.log(error, "123");
+      //       }
+      //       console.log(result);
+      //       setRank(result);
+      //       setLoading(false);
+      //     }
+      //   );
+      // }
+
+      // console.log(result);
+      // console.log("loop finished");
+      // console.log(new Date().getTime() - time);
     };
-    getData();
+    // getData();
 
     ///Local Storage Logic-------------------**-------------------**--------------------
 
-    // const checkData = async () => {
-    //   try {
-    //     const value = await AsyncStorage.getItem(title);
-    //     if (value) {
-    //       console.log("Data Found");
-    //       console.log(JSON.parse(value));
-    //       setRank(JSON.parse(value));
-    //       setLoading(false);
-    //     } else {
-    //       getData();
-    //     }
-    //   } catch (err) {
-    //     console.log(err, "Error Reading data from storage", "123");
-    //   }
-    // };
+    const checkData = async () => {
+      try {
+        const value = await AsyncStorage.getItem(title);
+        if (value) {
+          console.log("Data Found");
+          console.log(JSON.parse(value));
+          setRank(JSON.parse(value));
+          setLoading(false);
+        } else {
+          getData();
+        }
+      } catch (err) {
+        console.log(err, "Error Reading data from storage", "123");
+      }
+    };
 
-    // checkData();
+    checkData();
   }, []);
   // console.log(rank);
 
@@ -215,7 +263,7 @@ const RankScreen = ({
           </View>
 
           <FlashList
-            data={rank}
+            data={rank[0]}
             persistentScrollbar={true}
             contentContainerStyle={{ paddingBottom: 10 }}
             estimatedItemSize={20000}
@@ -300,11 +348,7 @@ const RankScreen = ({
         <Input
           value={name}
           onChangeText={(text) => setName(text)}
-          placeholder={`Search by ${check1 ? "Rank, " : ""}${
-            check2 ? "UserName, " : ""
-          }${check3 ? "Country, " : ""}${check4 ? "Score, " : ""}${
-            check5 ? "Language, " : ""
-          }`}
+          placeholder="Search Results"
           rightIcon={
             <MaterialCommunityIcons
               name="filter-menu-outline"
@@ -314,107 +358,16 @@ const RankScreen = ({
             />
           }
         />
-
-        <View style={styles.centeredView}>
-          <Modal
-            animationType="slide"
-            transparent={true}
-            style={{ backgroundColor: "black" }}
-            visible={modalVisible}
-            onRequestClose={() => {
-              Alert.alert("Modal has been closed.");
-              setModalVisible(!modalVisible);
-            }}
-          >
-            <View
-              style={{
-                backgroundColor: "rgba(0, 0, 0, 0.5)",
-                height: "100%",
-                // width: "80%",
-                padding: 20,
-                alignItems: "center",
-                justifyContent: "center",
-                // transform: [{ translateX: 35 }, { translateY: 100 }],
-              }}
-            >
-              <View
-                style={{
-                  backgroundColor: "#EEF1FF",
-                  // width: "90%",
-                  padding: 15,
-                }}
-              >
-                <View style={{ flexDirection: "row", padding: 10 }}>
-                  <Text style={{ flex: 1, fontSize: 20, fontWeight: 600 }}>
-                    Select Filtering Conditions
-                  </Text>
-                  <Ionicons
-                    name="close-sharp"
-                    size={24}
-                    color="black"
-                    onPress={() => setModalVisible(!modalVisible)}
-                  />
-                </View>
-
-                <CheckBox
-                  title="Rank"
-                  checked={check1}
-                  onPress={() => setCheck1(!check1)}
-                />
-                <CheckBox
-                  title="UserName"
-                  checked={check2}
-                  onPress={() => setCheck2(!check2)}
-                />
-                <CheckBox
-                  title="Country"
-                  checked={check3}
-                  onPress={() => setCheck3(!check3)}
-                />
-                <CheckBox
-                  title="Score"
-                  checked={check4}
-                  onPress={() => setCheck4(!check4)}
-                />
-                <CheckBox
-                  title="Language"
-                  checked={check5}
-                  onPress={() => setCheck5(!check5)}
-                />
-                <Button
-                  title="Search"
-                  buttonStyle={{
-                    backgroundColor: "rgba(78, 116, 289, 1)",
-                    borderRadius: 3,
-                  }}
-                  containerStyle={{
-                    width: 200,
-                    marginHorizontal: 50,
-                    marginVertical: 10,
-                    alignSelf: "center",
-                  }}
-                />
-              </View>
-            </View>
-          </Modal>
-        </View>
+        <SearchModal
+          setModalVisible={setModalVisible}
+          modalVisible={modalVisible}
+        />
       </View>
     </>
   );
 };
 
 export default RankScreen;
-
-const styles = StyleSheet.create({
-  centeredView: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    elevate: 3,
-    // borderWidth: 1,
-    borderColor: "black",
-  },
-});
 
 // try {
 //   const res = await Promise.all(arr);
