@@ -105,6 +105,7 @@ const HomeScreen = ({ navigation }) => {
           placeholder="Enter Contest Number"
           round
           value={input}
+          inputMode="numeric"
         />
         <Button
           title="Search"

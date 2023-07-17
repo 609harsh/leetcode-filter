@@ -10,33 +10,38 @@ import FilterScreen from "./screen/FilterScreen";
 import UserScreen from "./screen/UserScreen";
 const Stack = createNativeStackNavigator();
 
+import { store } from "./redux/store";
+import { Provider } from "react-redux";
+
 export default function App() {
   return (
-    <SafeAreaProvider>
-      <NavigationContainer>
-        <Stack.Navigator initialRouteName={HomeScreen}>
-          <Stack.Screen
-            name="Home"
-            component={HomeScreen}
-            options={{ headerShown: false }}
-          />
-          <Stack.Screen name="Rank" component={RankScreen} />
-          <Stack.Screen name="Global" component={GlobalScreen} />
-          <Stack.Screen
-            name="Filter"
-            component={FilterScreen}
-            options={{ presentation: "card", animation: "slide_from_bottom" }}
-          />
-          <Stack.Screen
-            name="User"
-            component={UserScreen}
-            options={{ presentation: "card", animation: "slide_from_bottom" }}
-          />
-          {/* <Stack.Screen name="Profile" component={Profile} /> */}
-          {/* <Stack.Screen name="Settings" component={Settings} /> */}
-        </Stack.Navigator>
-      </NavigationContainer>
-    </SafeAreaProvider>
+    <Provider store={store}>
+      <SafeAreaProvider>
+        <NavigationContainer>
+          <Stack.Navigator initialRouteName={HomeScreen}>
+            <Stack.Screen
+              name="Home"
+              component={HomeScreen}
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen name="Rank" component={RankScreen} />
+            <Stack.Screen name="Global" component={GlobalScreen} />
+            <Stack.Screen
+              name="Filter"
+              component={FilterScreen}
+              options={{ presentation: "card", animation: "slide_from_bottom" }}
+            />
+            <Stack.Screen
+              name="User"
+              component={UserScreen}
+              options={{ presentation: "card", animation: "slide_from_bottom" }}
+            />
+            {/* <Stack.Screen name="Profile" component={Profile} /> */}
+            {/* <Stack.Screen name="Settings" component={Settings} /> */}
+          </Stack.Navigator>
+        </NavigationContainer>
+      </SafeAreaProvider>
+    </Provider>
   );
 }
 

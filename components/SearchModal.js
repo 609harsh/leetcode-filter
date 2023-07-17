@@ -1,15 +1,9 @@
-import {
-  StyleSheet,
-  Text,
-  View,
-  Alert,
-  Modal,
-  Pressable,
-  TextInput,
-} from "react-native";
+import { StyleSheet, Text, View, Alert, Modal, TextInput } from "react-native";
 import { CheckBox, SearchBar, Button, Input } from "@rneui/themed";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Ionicons } from "@expo/vector-icons";
+import { useDispatch, useSelector } from "react-redux";
+import { getSearchVal, searchVal } from "../redux/SearchSlice";
 
 const SearchModal = ({ setModalVisible, modalVisible }) => {
   const [check1, setCheck1] = useState(false);
@@ -17,14 +11,38 @@ const SearchModal = ({ setModalVisible, modalVisible }) => {
   const [check3, setCheck3] = useState(false);
   const [check4, setCheck4] = useState(false);
   const [check5, setCheck5] = useState(false);
-  const [start, setStart] = useState(false);
-  const [end, setEnd] = useState(false);
+  const [start, setStart] = useState("");
+  const [end, setEnd] = useState("");
   const [user, setUser] = useState("");
   const [country, setCountry] = useState("");
-  const [score, setScore] = useState();
-  const [language, setLanguage] = useState();
+  const [score, setScore] = useState("");
+  const [language, setLanguage] = useState("");
+  const [data, setData] = useState({});
+  const dispatch = useDispatch();
+  const values = useSelector(getSearchVal);
+
+  useEffect(() => {
+    console.log(values);
+    setData(values);
+  }, []);
+
   const search = () => {
-    const filteredData = setRank(filteredData);
+    console.log(values);
+    dispatch(
+      searchVal({
+        rank: {
+          start,
+          end,
+        },
+        username: user,
+        country,
+        score,
+        lang: language,
+      })
+    );
+
+    console.log("values dispatched");
+    setModalVisible(!modalVisible);
   };
 
   return (
@@ -88,12 +106,14 @@ const SearchModal = ({ setModalVisible, modalVisible }) => {
                     onChangeText={(text) => setStart(text)}
                     placeholder="Enter Value"
                     inputMode="numeric"
+                    defaultValue={data?.values?.rank?.start}
                   />
                   <Text style={{ fontSize: 18, fontWeight: 500 }}>End</Text>
                   <TextInput
                     onChangeText={(text) => setEnd(text)}
                     placeholder="Enter Value"
                     inputMode="numeric"
+                    defaultValue={data?.values?.rank?.end}
                   />
                 </View>
               )}
@@ -117,6 +137,7 @@ const SearchModal = ({ setModalVisible, modalVisible }) => {
                       height: 40,
                       padding: 10,
                     }}
+                    defaultValue={data?.values?.username}
                   />
                 </View>
               )}
@@ -140,6 +161,7 @@ const SearchModal = ({ setModalVisible, modalVisible }) => {
                       height: 40,
                       padding: 10,
                     }}
+                    defaultValue={data?.values?.country}
                   />
                 </View>
               )}
@@ -164,6 +186,7 @@ const SearchModal = ({ setModalVisible, modalVisible }) => {
                       height: 40,
                       padding: 10,
                     }}
+                    defaultValue={data?.values?.score}
                   />
                 </View>
               )}
@@ -187,6 +210,7 @@ const SearchModal = ({ setModalVisible, modalVisible }) => {
                       height: 40,
                       padding: 10,
                     }}
+                    defaultValue={data?.values?.lang}
                   />
                 </View>
               )}
