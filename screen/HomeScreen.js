@@ -26,11 +26,13 @@ const HomeScreen = ({ navigation }) => {
         : `https://leetcode.com/contest/api/info/weekly-contest-${input}`;
     try {
       const res = await axios.get(url);
-      console.log(res.data.questions, "12345");
+      if (res?.data?.error) {
+        alert(res?.data?.error);
+      }
       setQuestions(res.data.questions);
       setData(res.data);
     } catch (err) {
-      console.log(err, 1234);
+      alert("Enter Valid contest details");
     }
   };
 

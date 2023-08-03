@@ -1,15 +1,15 @@
-import { StyleSheet, Text, View, Alert, Modal, Pressable } from "react-native";
+import { Text, View, Image } from "react-native";
 import React, { useEffect, useLayoutEffect } from "react";
 import axios from "axios";
 import { useState } from "react";
-import { Input, Divider, CheckBox, SearchBar, Button } from "@rneui/themed";
+import { Divider, Button } from "@rneui/themed";
 import { FlashList } from "@shopify/flash-list";
 import { Ionicons } from "@expo/vector-icons";
-import SimpleLottie from "../components/SimpleLottie";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import each from "async/each";
 import SearchModal from "../components/SearchModal";
+import { useSelector } from "react-redux";
+import { getSearchVal } from "../redux/SearchSlice";
+import CountryFlag from "react-native-country-flag";
 const RankScreen = ({
   navigation,
   route: {
@@ -17,11 +17,58 @@ const RankScreen = ({
   },
 }) => {
   const [rank, setRank] = useState([]);
-  const [name, setName] = useState();
-  const [country, setCountry] = useState();
-  const [score, setScore] = useState();
   const [loading, setLoading] = useState(true);
   const [modalVisible, setModalVisible] = useState(false);
+  const [data, setData] = useState();
+  const searchParam = useSelector(getSearchVal);
+
+  useEffect(() => {
+    let start = Number(searchParam?.values?.rank?.start);
+    let end = Number(searchParam?.values?.rank?.end);
+    let user = searchParam?.values?.username;
+    let country = searchParam?.values?.country;
+    let score = searchParam?.values?.score;
+    let check1 = searchParam?.values?.check1;
+    let check2 = searchParam?.values?.check2;
+    let check3 = searchParam?.values?.check3;
+    let check4 = searchParam?.values?.check4;
+    let check5 = searchParam?.values?.check5;
+    // console.log(rank);
+
+    if (rank.length > 0) {
+      let data = [].concat(...rank[1]);
+      if (check1 && start && end) {
+        data = data.filter((ele) => {
+          return ele.rank >= start && ele.rank <= end;
+        });
+      } else if (check1 && start) {
+        data = data.filter((ele) => {
+          return ele.rank >= start;
+        });
+      } else if (check1 && end) {
+        data = data.filter((ele) => {
+          return ele.rank <= end;
+        });
+      }
+      if (check2 && user) {
+        data = data.filter((ele) => {
+          return ele.username.includes(user);
+        });
+      }
+      if (check3 && country) {
+        data = data.filter((ele) => {
+          return ele.country_code === country;
+        });
+      }
+      if (check4 && score) {
+        data = data.filter((ele) => {
+          return Number(ele.score) === Number(score);
+        });
+      }
+      data.sort((a, b) => Number(a.rank) - Number(b.rank));
+      setData(data);
+    }
+  }, [rank, searchParam]);
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -56,41 +103,13 @@ const RankScreen = ({
     });
   }, []);
 
-  //Local Storage Logic -----------------**---------------------**------------------------
-
-  // useEffect(() => {
-  //   const checkData = async () => {
-  //     try {
-  //       const value = await AsyncStorage.getItem(title);
-
-  //       if (value === null && rank.length != 0) {
-  //         console.log("Data not Found");
-  //         try {
-  //           const stringValue = JSON.stringify(rank);
-  //           await AsyncStorage.setItem(title, stringValue);
-  //         } catch (err) {
-  //           console.log(err, "Error Writing Value");
-  //         }
-  //       }
-  //     } catch (err) {
-  //       console.log(err, "Error Reading data from storage");
-  //     }
-  //   };
-  //   checkData();
-  // }, [rank]);
-
   useEffect(() => {
     const getData = async () => {
-      // let i = 0;
-      // const url = `https://leetcode.com/contest/api/ranking/${title}/?pagination=${0}&region=global`;
-      console.log("Process Started");
       const res = await axios.get(
         `https://leetcode.com/contest/api/ranking/${title}/?pagination=${1}&region=global`
       );
       let user_num = res.data.user_num;
       let pages = Math.ceil(user_num / 25);
-      let count_loops = Math.ceil(pages / 100);
-      let time = new Date().getTime();
       let result = [];
       let total_rank = [];
       let submission = [];
@@ -101,113 +120,54 @@ const RankScreen = ({
           `https://leetcode.com/contest/api/ranking/${title}/?pagination=${j}&region=global`
         );
       }
-      // each(
-      //   arr,
-      //   async function (file, callback) {
-      //     const res = await axios.get(file);
-      //     if (res.data) {
-      //       result.push(res.data);
-      //       total_rank.push(res.data.total_rank);
-      //       submission.push(res.data.submissions);
-      //       console.log(1);
-      //       // console.log("All data fetched");
-      //       return callback();
-      //     }
-      //     console.log(res, "error", "1253");
-      //     callback();
-      //   },
-      //   (error) => {
-      //     if (error) {
-      //       console.log(error, "123");
-      //     }
-      //     final_result.push(result);
-      //     final_result.push(total_rank);
-      //     final_result.push(submission);
-      //     console.log(final_result);
-
-      //     //Store Value in local storage
-      //     const storeVal = async () => {
-      //       try {
-      //         const stringValue = JSON.stringify(final_result);
-      //         await AsyncStorage.setItem(title, stringValue);
-      //         console.log("Data stored Succesfully");
-      //       } catch (err) {
-      //         console.log(err, "Error Writing Value");
-      //       }
-      //     };
-
-      //     storeVal();
-
-      //     setRank(final_result);
-      //     setLoading(false);
-      //   }
-      // );
-      setLoading(false);
-      // for (let i = 0; i < count_loops; i++) {
-      //   let arr = [];
-      //   console.log("Process Started", "loop", i);
-      //   for (let j = i * 100 + 1; j <= Math.min(i * 100 + 100, pages); j++) {
-      //     arr.push(
-      //       `https://leetcode.com/contest/api/ranking/${title}/?pagination=${j}&region=global`
-      //     );
-      //   }
-
-      //   each(
-      //     arr,
-      //     async function (file, callback) {
-      //       const res = await axios.get(file);
-      //       if (res.data) {
-      //         result.push(res.data);
-      //         console.log(res.data);
-      //         // console.log("All data fetched");
-      //         return callback();
-      //       }
-      //       console.log(res, "error", "1253");
-      //       callback();
-      //     },
-      //     (error) => {
-      //       if (error) {
-      //         console.log(error, "123");
-      //       }
-      //       console.log(result);
-      //       setRank(result);
-      //       setLoading(false);
-      //     }
-      //   );
-      // }
-
-      // console.log(result);
-      // console.log("loop finished");
-      // console.log(new Date().getTime() - time);
-    };
-    // getData();
-
-    ///Local Storage Logic-------------------**-------------------**--------------------
-
-    const checkData = async () => {
-      try {
-        const value = await AsyncStorage.getItem(title);
-        if (value) {
-          console.log("Data Found");
-          console.log(JSON.parse(value));
-          setRank(JSON.parse(value));
+      each(
+        arr,
+        async function (file, callback) {
+          const res = await axios.get(file);
+          if (res.data) {
+            result.push(res.data);
+            total_rank.push(res.data.total_rank);
+            submission.push(res.data.submissions);
+            // console.log("All data fetched");
+            return callback();
+          }
+          callback();
+        },
+        (error) => {
+          if (error) {
+            alert("Ranking Data Fetched Failed  ");
+          }
+          final_result.push(result);
+          final_result.push(total_rank);
+          final_result.push(submission);
+          setRank(final_result);
           setLoading(false);
-        } else {
-          getData();
         }
-      } catch (err) {
-        console.log(err, "Error Reading data from storage", "123");
-      }
+      );
     };
-
-    checkData();
+    getData();
   }, []);
-  // console.log(rank);
 
   return (
     <>
       {loading ? (
-        <SimpleLottie />
+        <View
+          style={{
+            alignItems: "center",
+            justifyContent: "center",
+            backgroundColor: "#fff",
+            flex: 1,
+            height: "100%",
+          }}
+        >
+          <Image
+            source={require("../assets/File.gif")}
+            style={{ height: 150, width: 150 }}
+          />
+          <Text style={{ fontSize: 20, fontWeight: 500 }}>
+            Fetching Files 🗃️
+          </Text>
+        </View>
       ) : (
         <View style={{ flex: 1, backgroundColor: "#EEF1FF" }}>
           <View
@@ -222,7 +182,7 @@ const RankScreen = ({
           >
             <Text
               style={{
-                width: 30,
+                width: 40,
                 textAlign: "center",
                 fontWeight: "700",
                 fontSize: 15,
@@ -262,90 +222,130 @@ const RankScreen = ({
             </Text>
           </View>
 
-          <FlashList
-            data={rank[0]}
+          {/* <FlashList
+            data={rank[1]}
             persistentScrollbar={true}
             contentContainerStyle={{ paddingBottom: 10 }}
-            estimatedItemSize={20000}
+            // estimatedItemSize={20000}
+            renderItem={({ item }) => ( */}
+
+          <FlashList
+            data={data}
+            contentContainerStyle={{ paddingBottom: 10 }}
+            estimatedItemSize={2000}
             renderItem={({ item }) => (
               <View>
-                <FlashList
-                  data={item.total_rank}
-                  estimatedItemSize={20000}
-                  renderItem={({ item }) => (
-                    <View>
-                      <View
-                        // key={item.rank}
-                        style={{
-                          flexDirection: "row",
-                          gap: 5,
-                          padding: 20,
-                          width: "100%",
-                        }}
-                      >
-                        <Text
-                          style={{
-                            width: 30,
-                            textAlign: "center",
-                            fontSize: 18,
-                          }}
-                        >
-                          {item.rank}
-                        </Text>
-                        <Text
-                          style={{
-                            flex: 1,
-                            fontSize: 18,
+                <View
+                  // key={item.rank}
+                  style={{
+                    flexDirection: "row",
+                    gap: 5,
+                    padding: 20,
+                    width: "100%",
+                  }}
+                >
+                  <Text
+                    style={{
+                      width: 40,
+                      textAlign: "center",
+                      fontSize: 18,
+                    }}
+                  >
+                    {item.rank}
+                  </Text>
+                  <Text
+                    style={{
+                      flex: 1,
+                      fontSize: 18,
 
-                            paddingLeft: 18,
-                          }}
-                        >
-                          {item.username}
-                        </Text>
-                        <Text
-                          style={{
-                            width: 50,
-                            textAlign: "center",
-                            fontSize: 18,
-                          }}
-                        >
-                          {item.score}
-                        </Text>
-                        <Text
-                          style={{
-                            width: 50,
-
-                            textAlign: "center",
-                            fontSize: 18,
-                          }}
-                        >
-                          {item.country_code
-                            ? item.country_code
-                            : item.data_region}
-                        </Text>
-                      </View>
-                      <Divider />
-                    </View>
-                  )}
-                  keyExtractor={(item) => item.rank + "" + item.finish_time}
-                />
+                      paddingLeft: 18,
+                    }}
+                    onPress={() =>
+                      navigation.navigate("User", { user: item.username })
+                    }
+                  >
+                    {item.username}
+                  </Text>
+                  <Text
+                    style={{
+                      width: 50,
+                      textAlign: "center",
+                      fontSize: 18,
+                    }}
+                  >
+                    {item.score}
+                  </Text>
+                  <View
+                    style={{
+                      width: 50,
+                      fontSize: 18,
+                      flexDirection: "row",
+                      justifyContent: "space-around",
+                      alignItems: "center",
+                    }}
+                  >
+                    <Text>
+                      {item.country_code ? item.country_code : item.data_region}
+                    </Text>
+                    <CountryFlag
+                      isoCode={
+                        item.country_code ? item.country_code : item.data_region
+                      }
+                      size={10}
+                    />
+                  </View>
+                </View>
+                <Divider />
               </View>
             )}
-            keyExtractor={(item, index) => item.time + "" + index}
+            keyExtractor={(item) => item.rank + "" + item.finish_time}
           />
+
+          {/* )}
+            keyExtractor={(item, index) =>
+              "" + index + "" + Math.floor(Math.random() * 1000000000)
+            }
+          /> */}
         </View>
       )}
       <View
         style={{
-          flexDirection: "row",
+          flexDirection: "column",
           paddingHorizontal: 10,
           borderTopColor: "black",
-          elevation: 4,
+          elevation: 2,
           // borderWidth: 1,
           paddingTop: 10,
         }}
       >
-        <Input
+        <Text style={{ textAlign: "right", fontWeight: "500" }}>
+          {data && `Showing ${data?.length} Results`}
+        </Text>
+        <Button
+          title="Search Results"
+          icon={{
+            name: "search",
+            type: "font-awesome",
+            size: 15,
+            color: "white",
+          }}
+          iconRight
+          iconContainerStyle={{ marginLeft: 10 }}
+          titleStyle={{ fontWeight: "500" }}
+          buttonStyle={{
+            backgroundColor: "rgba(199, 43, 98, 1)",
+            borderColor: "transparent",
+            borderWidth: 0,
+            borderRadius: 30,
+          }}
+          containerStyle={{
+            width: "100%",
+            marginVertical: 10,
+          }}
+          onPress={() => setModalVisible(!modalVisible)}
+        />
+
+        {/* <Input
           value={name}
           onChangeText={(text) => setName(text)}
           placeholder="Search Results"
@@ -357,7 +357,7 @@ const RankScreen = ({
               onPress={() => setModalVisible(!modalVisible)}
             />
           }
-        />
+        /> */}
         <SearchModal
           setModalVisible={setModalVisible}
           modalVisible={modalVisible}

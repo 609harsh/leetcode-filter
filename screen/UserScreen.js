@@ -1,5 +1,5 @@
 import { ScrollView, StyleSheet, Text, View } from "react-native";
-import React, { useLayoutEffect, useState } from "react";
+import React, { useEffect, useLayoutEffect, useState } from "react";
 import { SearchBar, Icon, Button } from "@rneui/themed";
 import axios from "axios";
 
@@ -39,7 +39,7 @@ const colors = [
   "rgba(29, 93, 155, 0.5)",
   "rgba(0, 0, 0, 0.5)",
 ];
-const UserScreen = ({ navigation }) => {
+const UserScreen = ({ navigation, route }) => {
   const [input, setInput] = useState();
   const [data, setData] = useState([]);
   const [languageProblemCount, setLanguageProblemCount] = useState([]);
@@ -122,7 +122,7 @@ const UserScreen = ({ navigation }) => {
         // responseData.push(response.data);
       })
       .catch((error) => {
-        console.log(error, "123");
+        alert("Data Fetched Failed ");
       });
     axios
       .request(config[1])
@@ -132,28 +132,24 @@ const UserScreen = ({ navigation }) => {
         // responseData.push(response.data);
       })
       .catch((error) => {
-        console.log(error, "456");
+        alert("Data Fetched Failed ");
       });
     axios
       .request(config[2])
       .then((response) => {
-        // setTagProblemCount(
-        //   response?.data?.data?.matchedUser?.tagProblemCounts
-        // );
         setProblemsSolved(response?.data?.data);
-        console.log(response?.data?.data);
-        // console.log(response.data);
-        // responseData.push(response.data);
       })
       .catch((error) => {
-        console.log(error, "456");
+        alert("Data Fetched Failed ");
       });
   };
-  console.log(tagProblemCount);
   useLayoutEffect(() => {
     navigation.setOptions({
       title: "Search User",
     });
+  }, []);
+  useEffect(() => {
+    setInput(route.params.user);
   }, []);
   return (
     <ScrollView style={{ backgroundColor: "#ffffff" }}>
@@ -236,11 +232,14 @@ const UserScreen = ({ navigation }) => {
           width={screenWidth}
           height={220}
           strokeWidth={16}
-          radius={32}
+          radius={24}
           chartConfig={{
             ...chartConfig,
             color: (opacity = 1, index) => {
               return colors[index];
+            },
+            propsForLabels: {
+              fontSize: 12,
             },
           }}
           hideLegend={false}
@@ -248,6 +247,8 @@ const UserScreen = ({ navigation }) => {
             paddingHorizontal: 20,
             marginBottom: 10,
             borderRadius: 15,
+            flex: 1,
+            flexWrap: "wrap",
           }}
         />
       )}
