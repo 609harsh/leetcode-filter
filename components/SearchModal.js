@@ -17,19 +17,15 @@ const SearchModal = ({ setModalVisible, modalVisible }) => {
   const [country, setCountry] = useState("");
   const [score, setScore] = useState("");
   const [language, setLanguage] = useState("");
-  const [data, setData] = useState({});
   const dispatch = useDispatch();
   const values = useSelector(getSearchVal);
 
-  useEffect(() => {
-    console.log(values);
-    setData(values);
-  }, []);
-
   const search = () => {
-    console.log(values);
+    console.log(JSON.stringify(values));
+    console.log(start);
     dispatch(
       searchVal({
+        ...values,
         rank: {
           start,
           end,
@@ -38,9 +34,13 @@ const SearchModal = ({ setModalVisible, modalVisible }) => {
         country,
         score,
         lang: language,
+        check1,
+        check2,
+        check3,
+        check4,
+        check5,
       })
     );
-
     console.log("values dispatched");
     setModalVisible(!modalVisible);
   };
@@ -106,14 +106,14 @@ const SearchModal = ({ setModalVisible, modalVisible }) => {
                     onChangeText={(text) => setStart(text)}
                     placeholder="Enter Value"
                     inputMode="numeric"
-                    defaultValue={data?.values?.rank?.start}
+                    defaultValue={start}
                   />
                   <Text style={{ fontSize: 18, fontWeight: 500 }}>End</Text>
                   <TextInput
                     onChangeText={(text) => setEnd(text)}
                     placeholder="Enter Value"
                     inputMode="numeric"
-                    defaultValue={data?.values?.rank?.end}
+                    defaultValue={end}
                   />
                 </View>
               )}
@@ -137,7 +137,7 @@ const SearchModal = ({ setModalVisible, modalVisible }) => {
                       height: 40,
                       padding: 10,
                     }}
-                    defaultValue={data?.values?.username}
+                    defaultValue={user}
                   />
                 </View>
               )}
@@ -151,7 +151,7 @@ const SearchModal = ({ setModalVisible, modalVisible }) => {
               {check3 && (
                 <View style={{ alignItems: "stretch" }}>
                   <TextInput
-                    onChangeText={(text) => setCountry(text)}
+                    onChangeText={(text) => setCountry(text.toUpperCase())}
                     placeholder="Ex: US"
                     style={{
                       borderWidth: 1,
@@ -161,7 +161,7 @@ const SearchModal = ({ setModalVisible, modalVisible }) => {
                       height: 40,
                       padding: 10,
                     }}
-                    defaultValue={data?.values?.country}
+                    defaultValue={country}
                   />
                 </View>
               )}
@@ -186,12 +186,13 @@ const SearchModal = ({ setModalVisible, modalVisible }) => {
                       height: 40,
                       padding: 10,
                     }}
-                    defaultValue={data?.values?.score}
+                    // value={values?.score}
+                    defaultValue={score}
                   />
                 </View>
               )}
             </View>
-            <View>
+            {/* <View>
               <CheckBox
                 title="Language"
                 checked={check5}
@@ -210,11 +211,12 @@ const SearchModal = ({ setModalVisible, modalVisible }) => {
                       height: 40,
                       padding: 10,
                     }}
-                    defaultValue={data?.values?.lang}
+                    // value={values?.lang}
+                    defaultValue={language}
                   />
                 </View>
               )}
-            </View>
+            </View> */}
             <Button
               title="Search"
               buttonStyle={{

@@ -10,6 +10,11 @@ const initialState = {
     country: "",
     score: "",
     lang: "",
+    check1: false,
+    check2: false,
+    check3: false,
+    check4: false,
+    check5: false,
   },
 };
 
@@ -23,6 +28,7 @@ export const searchSlice = createSlice({
       // which detects changes to a "draft state" and produces a brand new
       // immutable state based off those changes
       // state.value += 1;
+      console.log(action.payload);
       state.values = action.payload;
     },
   },

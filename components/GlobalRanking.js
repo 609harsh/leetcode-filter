@@ -1,34 +1,43 @@
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View, Image, Linking } from "react-native";
 import React, { useState, useEffect } from "react";
 import { FlashList } from "@shopify/flash-list";
 import { Divider, Button } from "@rneui/themed";
-import { useFonts } from "expo-font";
 import axios from "axios";
 import { useNavigation } from "@react-navigation/native";
-// import url('https://fonts.googleapis.com/css2?family=Inter:wght@100&display=swap');
+import CountryFlag from "react-native-country-flag";
 
 const GlobalRanking = () => {
   const [global, setGlobal] = useState([]);
   const navigation = useNavigation();
-  useEffect(() => {}, []);
+
   useEffect(() => {
     const getData = async () => {
-      try {
-        const res = await axios.get(
-          "https://leetcode.com/_next/data/An09Lck2ZmRNnY-kK3JeS/contest.json"
-        );
-        console.log(res.data);
-        setGlobal([
-          res?.data?.pageProps?.dehydratedState?.queries[2]?.state?.data
-            ?.globalRanking?.rankingNodes,
-          res?.data?.pageProps?.dehydratedState?.queries[4]?.state?.data
-            ?.topTwoContests,
-          res?.data?.pageProps?.dehydratedState?.queries[1]?.state?.data
-            ?.pastContests?.data,
-        ]);
-      } catch (err) {
-        alert("Error Fetching results");
-      }
+      let data = JSON.stringify({
+        operationName: null,
+        variables: {},
+        query:
+          "{\n  globalRanking(page: 1) {\n    totalUsers\n    userPerPage\n    myRank {\n      ranking\n      currentGlobalRanking\n      currentRating\n      dataRegion\n      user {\n        nameColor\n        activeBadge {\n          displayName\n          icon\n          __typename\n        }\n        __typename\n      }\n      __typename\n    }\n    rankingNodes {\n      ranking\n      currentRating\n      currentGlobalRanking\n      dataRegion\n      user {\n        username\n        nameColor\n        activeBadge {\n          displayName\n          icon\n          __typename\n        }\n        profile {\n          userAvatar\n          countryCode\n          countryName\n          realName\n          __typename\n        }\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n",
+      });
+      let config = {
+        method: "post",
+        maxBodyLength: Infinity,
+        url: "https://leetcode.com/graphql",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        data: data,
+      };
+      axios
+        .request(config)
+        .then((res) => {
+          setGlobal([
+            res?.data?.data?.globalRanking?.rankingNodes,
+            res?.data?.data?.globalRanking?.totalUsers,
+          ]);
+        })
+        .catch((error) => {
+          alert("Data Fetch Failed");
+        });
     };
     getData();
   }, []);
@@ -130,7 +139,12 @@ const GlobalRanking = () => {
                 >
                   {item.currentGlobalRanking}
                 </Text>
-                <Text style={{ flex: 1, fontSize: 15 }}>
+                <Text
+                  style={{ flex: 1, fontSize: 15 }}
+                  onPress={() =>
+                    navigation.navigate("User", { user: item.user.username })
+                  }
+                >
                   {item.user.username}
                 </Text>
                 <Text
@@ -138,13 +152,29 @@ const GlobalRanking = () => {
                 >
                   {parseInt(item.currentRating)}
                 </Text>
-                <Text
-                  style={{ textAlign: "center", width: "20%", fontSize: 15 }}
+                <View
+                  style={{
+                    width: "20%",
+                    fontSize: 15,
+                    flexDirection: "row",
+                    justifyContent: "space-around",
+                    alignItems: "center",
+                  }}
                 >
-                  {item.user.profile.countryCode
-                    ? item.user.profile.countryCode
-                    : item.dataRegion}
-                </Text>
+                  <Text>
+                    {item.user.profile.countryCode
+                      ? item.user.profile.countryCode
+                      : item.dataRegion}
+                  </Text>
+                  <CountryFlag
+                    isoCode={
+                      item.user.profile.countryCode
+                        ? item.user.profile.countryCode
+                        : item.dataRegion
+                    }
+                    size={10}
+                  />
+                </View>
               </View>
               <Divider />
             </>
@@ -169,6 +199,14 @@ const GlobalRanking = () => {
         }}
         onPress={() => navigation.navigate("Global")}
       />
+
+      {/* <Image
+        style={{ width: 100, height: 100 }}
+        source={{
+          uri: "https://upload.wikimedia.org/wikipedia/commons/f/f0/Everest_North_Face_toward_Base_Camp_Tibet_Luca_Galuzzi_2006_edit_1.jpg",
+        }}
+        resizeMode={"cover"}
+      /> */}
     </View>
   );
 };
