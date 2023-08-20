@@ -16,7 +16,7 @@ const HomeScreen = ({ navigation }) => {
   const [data, setData] = useState();
 
   const onSearchUser = async () => {
-    navigation.navigate("User");
+    navigation.navigate("User", { user: "" });
   };
 
   const onSearch = async () => {

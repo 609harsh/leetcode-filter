@@ -116,10 +116,14 @@ const UserScreen = ({ navigation, route }) => {
     axios
       .request(config[0])
       .then((response) => {
-        setLanguageProblemCount(
-          response?.data?.data?.matchedUser?.languageProblemCount
-        );
-        // responseData.push(response.data);
+        // console.log(response, "hehe");
+        if (response?.data?.data?.matchedUser === null)
+          alert("This User does not exist");
+        else {
+          setLanguageProblemCount(
+            response?.data?.data?.matchedUser?.languageProblemCount
+          );
+        }
       })
       .catch((error) => {
         alert("Data Fetched Failed ");
@@ -127,7 +131,14 @@ const UserScreen = ({ navigation, route }) => {
     axios
       .request(config[1])
       .then((response) => {
-        setTagProblemCount(response?.data?.data?.matchedUser?.tagProblemCounts);
+        if (response?.data?.data?.matchedUser === null)
+          alert("This User does not exist");
+        else {
+          setTagProblemCount(
+            response?.data?.data?.matchedUser?.tagProblemCounts
+          );
+        }
+
         // console.log(response.data);
         // responseData.push(response.data);
       })
@@ -137,7 +148,13 @@ const UserScreen = ({ navigation, route }) => {
     axios
       .request(config[2])
       .then((response) => {
-        setProblemsSolved(response?.data?.data);
+        if (response?.data?.data?.matchedUser === null)
+          alert("This User does not exist");
+        else {
+          setProblemsSolved(response?.data?.data);
+        }
+        // console.log(response, "hehuy");
+        // setProblemsSolved(response?.data?.data);
       })
       .catch((error) => {
         alert("Data Fetched Failed ");
